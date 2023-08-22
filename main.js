@@ -17,6 +17,10 @@ const servers = {
 }
 
 
+let handleUserLeft = (MemberId) => { 
+    document.getElementById('user-2').style.display = 'none'
+    document.getElementById('user-1').classList.remove('smallFrame')
+}
 
 let handleMessageFromPeer = async (message, MemberId) => {
 
@@ -49,6 +53,9 @@ let createPeerConnection = async(memberId) => {
     remoteStream = new MediaStream()
     let videoElement = document.getElementById('user-2')
     videoElement.srcObject = remoteStream
+    
+    document.getElementById('user-2').style.display = 'block' 
+    document.getElementById('user-1').classList.add('smallFrame') 
 
     if(!localStream){
         localStream = await navigator.mediaDevices.getUserMedia({video:true, audio:false})
@@ -106,6 +113,7 @@ let init = async () => {
     await channel.join()
 
     channel.on('MemberJoined', handleUserJoined)
+    channel.on('MemberLeft', handleUserLeft) //----
     client.on('MessageFromPeer', handleMessageFromPeer)
 
     localStream = await navigator.mediaDevices.getUserMedia({video:true, audio:false})
@@ -119,4 +127,11 @@ let init = async () => {
     
 }
 
+
+let leaveChannel = async () => {
+    await channel.leave()
+    await client.logout()
+}
+
+window.addEventListener('beforeunload', leaveChannel)
 init()
